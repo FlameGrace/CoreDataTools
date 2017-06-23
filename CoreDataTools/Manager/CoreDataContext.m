@@ -2,7 +2,7 @@
 //  CoreDataContext.m
 //  manydb
 //
-//  Created by 李嘉军 on 16/10/18.
+//  Created by Flame Grace on 16/10/18.
 //  Copyright © 2016年 hello. All rights reserved.
 //
 
@@ -52,7 +52,7 @@ static CoreDataContext *sharedContext = nil;
 
 
 - (NSURL *)applicationDocumentsDirectory {
-    // The directory the application uses to store the Core Data store file. This code uses a directory named "com.leapmotor.testleapmotor.TestLeapmotor" in the application's documents directory.
+    // The directory the application uses to store the Core Data store file. This code uses a directory named "com.flamegrace@hotmail.com.testflamegrace@hotmail.com.Testflamegrace@hotmail.com" in the application's documents directory.
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
 

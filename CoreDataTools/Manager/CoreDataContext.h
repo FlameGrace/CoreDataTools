@@ -2,7 +2,7 @@
 //  CoreDataContext.h
 //  manydb
 //
-//  Created by 李嘉军 on 16/10/18.
+//  Created by Flame Grace on 16/10/18.
 //  Copyright © 2016年 hello. All rights reserved.
 //  可以切换数据库
 

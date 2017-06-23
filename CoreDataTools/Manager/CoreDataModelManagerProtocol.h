@@ -1,9 +1,9 @@
 //
 //  CoreDataManagerProtocol.h
-//  leapmotor
+//  flamegrace@hotmail.com
 //
-//  Created by 李嘉军 on 16/8/31.
-//  Copyright © 2016年 Leapmotor. All rights reserved.
+//  Created by Flame Grace on 16/8/31.
+//  Copyright © 2016年 flamegrace@hotmail.com. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
