@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "CoreDataModel.h"
+#import "CoreDataModelProtocol.h"
 
 // CoreData管理类的协议
 @protocol CoreDataModelManagerProtocol <NSObject>
@@ -17,12 +17,12 @@
 - (NSString *)entityName;
 
 // 必须在每个子类重写将NSManagedObject数据更新到Model的方法
-- (void)updateModel:(CoreDataModel *)model byManagedObject:(NSManagedObject *)managedObject;
+- (void)updateModel:(id<CoreDataModelProtocol>)model byManagedObject:(NSManagedObject *)managedObject;
 
 // 必须在每个子类重写将Model数据更新到NSManagedObject的方法
-- (void)updateManagedObject:(NSManagedObject *)managedObject byModel:(CoreDataModel *)model;
+- (void)updateManagedObject:(NSManagedObject *)managedObject byModel:(id<CoreDataModelProtocol>)model;
 
 // 必须在每个子类重写将NSManagedObject转换成到Model的方法
-- (CoreDataModel *)getModelFromManagedObject:(NSManagedObject *)managedObject;
+- (id<CoreDataModelProtocol>)getModelFromManagedObject:(NSManagedObject *)managedObject;
 
 @end

@@ -29,36 +29,36 @@
 }
 
 
-- (CoreDataModel *)getModelFromManagedObject:(NSManagedObject *)managedObject
+- (id<CoreDataModelProtocol>)getModelFromManagedObject:(NSManagedObject *)managedObject
 {
     return nil;
 }
 
 
-- (NSMutableArray <CoreDataModel *> *)getModelsFromManagedObjects:(NSArray <NSManagedObject *> *)managedObjects
+- (NSMutableArray <id<CoreDataModelProtocol>> *)getModelsFromManagedObjects:(NSArray <NSManagedObject *> *)managedObjects
 {
     
     NSMutableArray *arr = [[NSMutableArray alloc]init];
     for (NSManagedObject *managedObject in managedObjects) {
-        CoreDataModel *model = [self getModelFromManagedObject:managedObject];
+        id<CoreDataModelProtocol>model = [self getModelFromManagedObject:managedObject];
         if(model)[arr addObject:model];
     }
     if([arr count] < 1) return nil;
     return arr;
 }
 
-- (void)updateManagedObject:(NSManagedObject *)managedObject byModel:(CoreDataModel *)model
+- (void)updateManagedObject:(NSManagedObject *)managedObject byModel:(id<CoreDataModelProtocol>)model
 {
     
 }
 
-- (void)updateModel:(CoreDataModel *)model byManagedObject:(NSManagedObject *)managedObject
+- (void)updateModel:(id<CoreDataModelProtocol>)model byManagedObject:(NSManagedObject *)managedObject
 {
     
 }
 
 
-- (BOOL)update:(CoreDataModel *)model
+- (BOOL)update:(id<CoreDataModelProtocol>)model
 {
     if(!model||!model.managedObjectID)return NO;
     [self updateManagedObject:[self.managedContext objectWithID:model.managedObjectID] byModel:model];
@@ -66,7 +66,7 @@
 }
 
 
-- (BOOL)createNewManagedObjectByModel:(CoreDataModel *)model
+- (BOOL)createNewManagedObjectByModel:(id<CoreDataModelProtocol>)model
 {
     NSManagedObject *managedObject =[NSEntityDescription insertNewObjectForEntityForName:[self entityName] inManagedObjectContext:self.managedContext];
     
@@ -99,7 +99,7 @@
     return YES;
 }
 
-- (NSMutableArray <CoreDataModel *> *)queryAll
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryAll
 {
 
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[self entityName]];
@@ -112,7 +112,7 @@
 {
     NSArray *records = [self queryAll];
     __block BOOL remove = YES;
-    [records enumerateObjectsUsingBlock:^(CoreDataModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [records enumerateObjectsUsingBlock:^(id<CoreDataModelProtocol>obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(![self removeManagedObject:obj.managedObjectID])
         {
             remove = NO;
@@ -122,7 +122,7 @@
     return remove;
 }
 
-- (NSMutableArray<CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc
+- (NSMutableArray<id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[self entityName]];
     
@@ -137,7 +137,7 @@
     return [self getModelsFromManagedObjects:array];
 }
 
-- (NSMutableArray<CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc limit:(NSInteger)limit offset:(NSInteger)offset
+- (NSMutableArray<id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc limit:(NSInteger)limit offset:(NSInteger)offset
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[self entityName]];
     NSPredicate *predict = [NSPredicate predicateWithFormat:format,value];
@@ -157,7 +157,7 @@
 
 
 
-- (NSMutableArray<CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value
+- (NSMutableArray<id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[self entityName]];
     

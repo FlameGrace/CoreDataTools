@@ -19,7 +19,7 @@
 @property (strong, nonatomic)NSManagedObjectContext * managedContext;
 
 // 将NSManagedObject对象的集合转换为相应实体的Model对象的数组
-- (NSMutableArray <CoreDataModel *> *)getModelsFromManagedObjects:(NSArray <NSManagedObject *> *)managedObjects;
+- (NSMutableArray <id<CoreDataModelProtocol>> *)getModelsFromManagedObjects:(NSArray <NSManagedObject *> *)managedObjects;
 
 // 删除一条数据
 - (BOOL)removeManagedObject:(NSManagedObjectID *)managedObjectID;
@@ -30,21 +30,21 @@
 - (BOOL)save;
 
 // 将一个Model对象转换成NSManagedObject，再更新到CoreData中
-- (BOOL)update:(CoreDataModel *)model;
+- (BOOL)update:(id<CoreDataModelProtocol>)model;
 
 // 根据一个Model对象在CoreData中创建一条数据
-- (BOOL)createNewManagedObjectByModel:(CoreDataModel *)model;
+- (BOOL)createNewManagedObjectByModel:(id<CoreDataModelProtocol>)model;
 
 // 查询一个实体里的所有数据
-- (NSMutableArray <CoreDataModel *> *)queryAll;
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryAll;
 
 // 条件查询
-- (NSMutableArray <CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value;
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value;
 
 // 条件查询，并根据条件排序
-- (NSMutableArray <CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc;
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc;
 
 // 条件查询，并根据条件排序,分页查询
-- (NSMutableArray <CoreDataModel *> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc limit:(NSInteger)limit offset:(NSInteger)offset;
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc limit:(NSInteger)limit offset:(NSInteger)offset;
 
 @end

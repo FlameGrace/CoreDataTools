@@ -8,13 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "CoreDataModelProtocol.h"
 
 // CoreData NSManagedObject转换后模型基类
-@interface CoreDataModel : NSObject
+@interface CoreDataModel : NSObject <CoreDataModelProtocol>
 
 + (instancetype)model;
-
-// 保存对应的NSManagedObject对象的ID
-@property (nonatomic, strong) NSManagedObjectID *managedObjectID;
 
 @end
