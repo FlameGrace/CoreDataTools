@@ -16,16 +16,18 @@
     return [[self alloc]init];
 }
 
+- (instancetype)init
+{
+    if(self = [super init])
+    {
+        self.managedContext = [[CoreDataContext sharedContext] generateNewPrivateQueueContext];
+    }
+    return self;
+}
+
 - (NSString *)entityName
 {
     return nil;
-}
-
-- (NSManagedObjectContext *)managedContext
-{
-    
-    if(!_managedContext)return [CoreDataContext sharedContext].managedObjectContext;
-    return _managedContext;
 }
 
 
@@ -91,9 +93,8 @@
 - (BOOL)save
 {
     NSError *error;
-    if(![self.managedContext save:&error])
+    if(![[CoreDataContext sharedContext] saveContext:self.managedContext error:&error])
     {
-        NSLog(@"CoreData save error: %@!",error);
         return NO;
     }
     return YES;

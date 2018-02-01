@@ -7,16 +7,18 @@
 //
 
 #import "CoreDataContext.h"
+typedef void(^ContextSaveBlock)(void);
 
 @interface CoreDataContext()
 
-@property (strong, nonatomic) NSString *modeldName;
+
 
 @end
 
 @implementation CoreDataContext
 
-@synthesize managedObjectContext = _managedObjectContext;
+@synthesize mainQueueObjectContext = _mainQueueObjectContext;
+@synthesize backgroundObjectContext = _backgroundObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
 
@@ -40,15 +42,6 @@ static CoreDataContext *sharedContext = nil;
     }
     return self;
 }
-
-
-
-- (NSString *)modeldName
-{
-    if(_modeldName)return _modeldName;
-    return Default_ModeldName;
-}
-
 
 
 - (NSURL *)applicationDocumentsDirectory {
@@ -96,38 +89,120 @@ static CoreDataContext *sharedContext = nil;
     return _persistentStoreCoordinator;
 }
 
-
-- (NSManagedObjectContext *)managedObjectContext {
-    // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.)
-    if (_managedObjectContext != nil) {
-        return _managedObjectContext;
+- (NSManagedObjectContext *)backgroundObjectContext
+{
+    if (_backgroundObjectContext != nil) {
+        return _backgroundObjectContext;
     }
     
     NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-    if (!coordinator) {
-        return nil;
+    if (coordinator != nil) {
+        _backgroundObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        [_backgroundObjectContext setPersistentStoreCoordinator:coordinator];
     }
-    _managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    [_managedObjectContext setPersistentStoreCoordinator:coordinator];
-    return _managedObjectContext;
+    return _backgroundObjectContext;
+}
+
+
+- (NSManagedObjectContext *)mainQueueObjectContext
+{
+    if (_mainQueueObjectContext != nil) {
+        return _mainQueueObjectContext;
+    }
+    
+    _mainQueueObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    _mainQueueObjectContext.parentContext = [self backgroundObjectContext];
+    return _mainQueueObjectContext;
+}
+
+
+- (NSManagedObjectContext *)generateNewPrivateQueueContext
+{
+    if([NSThread isMainThread])
+    {
+        return _mainQueueObjectContext;
+    }
+    NSManagedObjectContext *context = [[self class]generatePrivateContextWithParent:[self mainQueueObjectContext]];
+    return context;
 }
 
 #pragma mark - Core Data Saving support
 
-- (void)saveContext {
-    NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
-    if (managedObjectContext != nil) {
+- (void)saveContextAndWait:(BOOL)needWait
+{
+    NSManagedObjectContext *mainQueueObjectContext = [self mainQueueObjectContext];
+    NSManagedObjectContext *backgroundObjectContext = [self backgroundObjectContext];
+    
+    if (nil == mainQueueObjectContext) {
+        return;
+    }
+    if ([mainQueueObjectContext hasChanges]) {
+        NSLog(@"Main context need to save");
+        [mainQueueObjectContext performBlockAndWait:^{
+            NSError *error = nil;
+            if (![mainQueueObjectContext save:&error]) {
+                NSLog(@"Save main context failed and error is %@", error);
+            }
+        }];
+    }
+    
+    if (nil == backgroundObjectContext) {
+        return;
+    }
+    
+     ContextSaveBlock saveBlock = ^ {
         NSError *error = nil;
-        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-            // Replace this implementation with code to handle the error appropriately.
-            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-            abort();
+        if (![backgroundObjectContext save:&error]) {
+            NSLog(@"Save root context failed and error is %@", error);
+        }
+    };
+    
+    if ([backgroundObjectContext hasChanges]) {
+        NSLog(@"Root context need to save");
+        if (needWait) {
+            [backgroundObjectContext performBlockAndWait:saveBlock];
+        }
+        else {
+            [backgroundObjectContext performBlock:saveBlock];
         }
     }
 }
 
+- (void)saveContext
+{
+    [self saveContextAndWait:NO];
+}
 
+- (BOOL)saveContext:(NSManagedObjectContext *)context error:(NSError **)error
+{
+    if(context == nil)
+    {
+        return YES;
+    }
+    if ([context hasChanges]) {
+        if([context save:error])
+        {
+            [self saveContext];
+            return YES;
+        }
+        else
+        {
+            if(error != NULL)
+            {
+                NSLog(@"CoreData save error: %@!",*error);
+            }
+            return NO;
+        }
+    }
+    return YES;
+}
+
++ (NSManagedObjectContext *)generatePrivateContextWithParent:(NSManagedObjectContext *)parentContext
+{
+    NSManagedObjectContext *privateContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    privateContext.parentContext = parentContext;
+    return privateContext;
+}
 
 
 @end

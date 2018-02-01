@@ -15,7 +15,7 @@
 
 + (instancetype)manager;
 
-// 默认为共享单例所指managedContext，也可重新赋值，可用于切换数据库
+// 初始化时默认自动创建managedContext，也可重新赋值，可用于切换数据库
 @property (strong, nonatomic)NSManagedObjectContext * managedContext;
 
 // 将NSManagedObject对象的集合转换为相应实体的Model对象的数组
