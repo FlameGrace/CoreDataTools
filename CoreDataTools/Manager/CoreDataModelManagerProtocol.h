@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "CoreDataContext.h"
 #import "CoreDataModelProtocol.h"
 
 // CoreData管理类的协议

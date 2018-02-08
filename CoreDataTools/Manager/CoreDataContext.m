@@ -120,7 +120,7 @@ static CoreDataContext *sharedContext = nil;
 {
     if([NSThread isMainThread])
     {
-        return _mainQueueObjectContext;
+        return self.mainQueueObjectContext;
     }
     NSManagedObjectContext *context = [[self class]generatePrivateContextWithParent:[self mainQueueObjectContext]];
     return context;
