@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
                       CoreDataTools Tools
                    DESC
 
-  s.author             = { "leapmotor" => "leapmotor" }
+  s.author             = { "FlameGrace" => "FlameGrace" }
   s.platform     = :ios, "8.0"
   s.source       = { :git => "https://github.com/FlameGrace/CoreDataTools.git", :tag => "0.0.1" }
 
@@ -30,6 +30,7 @@ Pod::Spec.new do |s|
   s.public_header_files = "**/*.h"
 
   s.license      = { :type => "BSD", :file => "../LICENSE" }
+  s.homepage     = "http://www.baidu.com"
 
   # s.framework  = "SomeFramework"
   # s.frameworks = "SomeFramework", "AnotherFramework"
