@@ -2,22 +2,24 @@
 //  CoreDataContext.m
 //  manydb
 //
-//  Created by Flame Grace on 16/10/18.
+//  Created by lijj on 16/10/18.
 //  Copyright © 2016年 hello. All rights reserved.
 //
 
 #import "CoreDataContext.h"
+
 typedef void(^ContextSaveBlock)(void);
 
 @interface CoreDataContext()
 
-
+@property (strong, nonatomic) dispatch_queue_t backgroundContextQueue;
+@property (strong, nonatomic) NSManagedObjectContext *backgroundObjectContext;//异步线程Context,异步保存数据，防止主线程阻塞
 
 @end
 
 @implementation CoreDataContext
 
-@synthesize mainQueueObjectContext = _mainQueueObjectContext;
+//@synthesize mainQueueObjectContext = _mainQueueObjectContext;
 @synthesize backgroundObjectContext = _backgroundObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
@@ -39,13 +41,30 @@ static CoreDataContext *sharedContext = nil;
     if(self = [super init])
     {
         self.modeldName = modeldName;
+        [self generateBackgroundObjectContext];
     }
     return self;
 }
 
+- (instancetype)init
+{
+    if(self = [super init])
+    {
+        [self generateBackgroundObjectContext];
+    }
+    return self;
+}
+
+- (void)generateBackgroundObjectContext
+{
+    dispatch_async(self.backgroundContextQueue, ^{
+        [self backgroundObjectContext];
+    });
+}
+
 
 - (NSURL *)applicationDocumentsDirectory {
-    // The directory the application uses to store the Core Data store file. This code uses a directory named "com.flamegrace@hotmail.com.testflamegrace@hotmail.com.Testflamegrace@hotmail.com" in the application's documents directory.
+    // The directory the application uses to store the Core Data store file. This code uses a directory named "com.leapmotor.testleapmotor.Testleapmotor" in the application's documents directory.
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
 
@@ -96,7 +115,8 @@ static CoreDataContext *sharedContext = nil;
     }
     
     NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-    if (coordinator != nil) {
+    if (coordinator != nil)
+    {
         _backgroundObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
         [_backgroundObjectContext setPersistentStoreCoordinator:coordinator];
     }
@@ -104,25 +124,32 @@ static CoreDataContext *sharedContext = nil;
 }
 
 
-- (NSManagedObjectContext *)mainQueueObjectContext
-{
-    if (_mainQueueObjectContext != nil) {
-        return _mainQueueObjectContext;
-    }
-    
-    _mainQueueObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    _mainQueueObjectContext.parentContext = [self backgroundObjectContext];
-    return _mainQueueObjectContext;
-}
+
+//- (NSManagedObjectContext *)mainQueueObjectContext
+//{
+//    if (_mainQueueObjectContext != nil) {
+//        return _mainQueueObjectContext;
+//    }
+//
+//    _mainQueueObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+//    _mainQueueObjectContext.parentContext = [self backgroundObjectContext];
+//    return _mainQueueObjectContext;
+//}
+
+
+//- (NSManagedObjectContext *)managedObjectContext
+//{
+//    return [self mainQueueObjectContext];
+//}
 
 
 - (NSManagedObjectContext *)generateNewPrivateQueueContext
 {
-    if([NSThread isMainThread])
-    {
-        return self.mainQueueObjectContext;
-    }
-    NSManagedObjectContext *context = [[self class]generatePrivateContextWithParent:[self mainQueueObjectContext]];
+//    if([NSThread isMainThread])
+//    {
+//        return self.mainQueueObjectContext;
+//    }
+    NSManagedObjectContext *context = [[self class]generatePrivateContextWithParent:[self backgroundObjectContext]];
     return context;
 }
 
@@ -130,35 +157,34 @@ static CoreDataContext *sharedContext = nil;
 
 - (void)saveContextAndWait:(BOOL)needWait
 {
-    NSManagedObjectContext *mainQueueObjectContext = [self mainQueueObjectContext];
+//    NSManagedObjectContext *mainQueueObjectContext = [self mainQueueObjectContext];
     NSManagedObjectContext *backgroundObjectContext = [self backgroundObjectContext];
     
-    if (nil == mainQueueObjectContext) {
-        return;
-    }
-    if ([mainQueueObjectContext hasChanges]) {
-        NSLog(@"Main context need to save");
-        [mainQueueObjectContext performBlockAndWait:^{
-            NSError *error = nil;
-            if (![mainQueueObjectContext save:&error]) {
-                NSLog(@"Save main context failed and error is %@", error);
-            }
-        }];
-    }
+//    if (nil == mainQueueObjectContext) {
+//        return;
+//    }
+//    if ([mainQueueObjectContext hasChanges]) {
+//        NSLog(@"Main context need to save");
+//        [mainQueueObjectContext performBlockAndWait:^{
+//            NSError *error = nil;
+//            if (![mainQueueObjectContext save:&error]) {
+//                NSLog(@"Save main context failed and error is %@", error);
+//            }
+//        }];
+//    }
     
     if (nil == backgroundObjectContext) {
         return;
     }
     
      ContextSaveBlock saveBlock = ^ {
-        NSError *error = nil;
-        if (![backgroundObjectContext save:&error]) {
-            NSLog(@"Save root context failed and error is %@", error);
-        }
+         NSError *error = nil;
+         if (![backgroundObjectContext save:&error]) {
+             NSLog(@"Save root context failed and error is %@", error);
+         }
     };
     
     if ([backgroundObjectContext hasChanges]) {
-        NSLog(@"Root context need to save");
         if (needWait) {
             [backgroundObjectContext performBlockAndWait:saveBlock];
         }
@@ -204,5 +230,14 @@ static CoreDataContext *sharedContext = nil;
     return privateContext;
 }
 
+
+- (dispatch_queue_t)backgroundContextQueue
+{
+    if(!_backgroundContextQueue)
+    {
+        _backgroundContextQueue = dispatch_queue_create("BackgroundCoreDataContextQueue", DISPATCH_QUEUE_PRIORITY_DEFAULT);
+    }
+    return _backgroundContextQueue;
+}
 
 @end

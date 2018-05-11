@@ -3,7 +3,7 @@
 //  SpeexChat
 //
 //  Created by 李嘉军 on 2017/7/25.
-//  Copyright © 2017年 flamegrace@hotmail.com. All rights reserved.
+//  Copyright © 2017年 leapmotor. All rights reserved.
 //
 
 #import <CoreData/CoreData.h>

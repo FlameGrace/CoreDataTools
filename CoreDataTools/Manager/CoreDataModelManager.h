@@ -1,9 +1,9 @@
 //
 //  CoreDataManager.h
-//  flamegrace@hotmail.com
+//  leapmotor
 //
-//  Created by Flame Grace on 16/8/31.
-//  Copyright © 2016年 flamegrace@hotmail.com. All rights reserved.
+//  Created by lijj on 16/8/31.
+//  Copyright © 2016年 leapmotor. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -15,7 +15,7 @@
 
 + (instancetype)manager;
 
-// 初始化时默认自动创建managedContext，也可重新赋值，可用于切换数据库
+//  初始化时会默认创建一个当前线程的managedContext，也可重新赋值，用于切换数据库
 @property (strong, nonatomic)NSManagedObjectContext * managedContext;
 
 // 将NSManagedObject对象的集合转换为相应实体的Model对象的数组
@@ -40,6 +40,9 @@
 
 // 条件查询
 - (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value;
+
+// 条件查询，并根据条件分页查询
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value limit:(NSInteger)limit offset:(NSInteger)offset;
 
 // 条件查询，并根据条件排序
 - (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc;

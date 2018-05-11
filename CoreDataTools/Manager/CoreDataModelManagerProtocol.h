@@ -1,14 +1,13 @@
 //
 //  CoreDataManagerProtocol.h
-//  flamegrace@hotmail.com
+//  leapmotor
 //
-//  Created by Flame Grace on 16/8/31.
-//  Copyright © 2016年 flamegrace@hotmail.com. All rights reserved.
+//  Created by lijj on 16/8/31.
+//  Copyright © 2016年 leapmotor. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "CoreDataContext.h"
 #import "CoreDataModelProtocol.h"
 
 // CoreData管理类的协议

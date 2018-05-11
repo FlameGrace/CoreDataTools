@@ -1,9 +1,9 @@
 //
 //  LMCoreDataModel.m
-//  flamegrace@hotmail.com
+//  leapmotor
 //
-//  Created by Flame Grace on 16/8/31.
-//  Copyright © 2016年 flamegrace@hotmail.com. All rights reserved.
+//  Created by lijj on 16/8/31.
+//  Copyright © 2016年 leapmotor. All rights reserved.
 //
 
 #import "CoreDataModel.h"

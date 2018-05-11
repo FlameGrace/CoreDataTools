@@ -1,12 +1,13 @@
 //
 //  CoreDataManager.m
-//  flamegrace@hotmail.com
+//  leapmotor
 //
-//  Created by Flame Grace on 16/8/31.
-//  Copyright © 2016年 flamegrace@hotmail.com. All rights reserved.
+//  Created by lijj on 16/8/31.
+//  Copyright © 2016年 leapmotor. All rights reserved.
 //
 
 #import "CoreDataModelManager.h"
+#import "CoreDataContext.h"
 
 @implementation CoreDataModelManager
 
@@ -70,14 +71,12 @@
 - (BOOL)createNewManagedObjectByModel:(id<CoreDataModelProtocol>)model
 {
     NSManagedObject *managedObject =[NSEntityDescription insertNewObjectForEntityForName:[self entityName] inManagedObjectContext:self.managedContext];
-    
     [self updateManagedObject:managedObject byModel:model];
     if([self save])
     {
         model.managedObjectID = managedObject.objectID;
         return YES;
     }
-    NSLog(@"model：%@创建失败",model);
     return NO;
 }
 
@@ -124,17 +123,12 @@
 
 - (NSMutableArray<id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc
 {
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[self entityName]];
-    
-    NSPredicate *predict = [NSPredicate predicateWithFormat:format,value];
-    [request setPredicate:predict];
-    
-    NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:asc];
-    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    
-    NSArray *array = [self.managedContext executeFetchRequest:request error:nil];
-    
-    return [self getModelsFromManagedObjects:array];
+    return [self queryWithPredicateFormat:format value:value sortKey:sortKey asc:asc limit:0 offset:0];
+}
+
+- (NSMutableArray <id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value limit:(NSInteger)limit offset:(NSInteger)offset
+{
+    return [self queryWithPredicateFormat:format value:value sortKey:nil asc:NO limit:limit offset:offset];
 }
 
 - (NSMutableArray<id<CoreDataModelProtocol>> *)queryWithPredicateFormat:(NSString *)format value:(id)value sortKey:(NSString *)sortKey asc:(BOOL)asc limit:(NSInteger)limit offset:(NSInteger)offset
@@ -143,15 +137,18 @@
     NSPredicate *predict = [NSPredicate predicateWithFormat:format,value];
     [request setPredicate:predict];
     
-    NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:asc];
-    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    
-    [request setFetchLimit:limit];
-    
-    [request setFetchOffset:offset];
+    if(limit > 0 && offset >= 0)
+    {
+        [request setFetchLimit:limit];
+        [request setFetchOffset:offset];
+    }
+    if(sortKey && sortKey.length > 0)
+    {
+        NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:asc];
+        [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    }
     
     NSArray *array = [self.managedContext executeFetchRequest:request error:nil];
-    
     return [self getModelsFromManagedObjects:array];
 }
 
@@ -168,7 +165,6 @@
     
     return [self getModelsFromManagedObjects:array];
 }
-
 
 
 
