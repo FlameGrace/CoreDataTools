@@ -19,7 +19,6 @@ typedef void(^ContextSaveBlock)(void);
 
 @implementation CoreDataContext
 
-//@synthesize mainQueueObjectContext = _mainQueueObjectContext;
 @synthesize backgroundObjectContext = _backgroundObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
@@ -123,32 +122,8 @@ static CoreDataContext *sharedContext = nil;
     return _backgroundObjectContext;
 }
 
-
-
-//- (NSManagedObjectContext *)mainQueueObjectContext
-//{
-//    if (_mainQueueObjectContext != nil) {
-//        return _mainQueueObjectContext;
-//    }
-//
-//    _mainQueueObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-//    _mainQueueObjectContext.parentContext = [self backgroundObjectContext];
-//    return _mainQueueObjectContext;
-//}
-
-
-//- (NSManagedObjectContext *)managedObjectContext
-//{
-//    return [self mainQueueObjectContext];
-//}
-
-
 - (NSManagedObjectContext *)generateNewPrivateQueueContext
 {
-//    if([NSThread isMainThread])
-//    {
-//        return self.mainQueueObjectContext;
-//    }
     NSManagedObjectContext *context = [[self class]generatePrivateContextWithParent:[self backgroundObjectContext]];
     return context;
 }
@@ -157,21 +132,7 @@ static CoreDataContext *sharedContext = nil;
 
 - (void)saveContextAndWait:(BOOL)needWait
 {
-//    NSManagedObjectContext *mainQueueObjectContext = [self mainQueueObjectContext];
     NSManagedObjectContext *backgroundObjectContext = [self backgroundObjectContext];
-    
-//    if (nil == mainQueueObjectContext) {
-//        return;
-//    }
-//    if ([mainQueueObjectContext hasChanges]) {
-//        NSLog(@"Main context need to save");
-//        [mainQueueObjectContext performBlockAndWait:^{
-//            NSError *error = nil;
-//            if (![mainQueueObjectContext save:&error]) {
-//                NSLog(@"Save main context failed and error is %@", error);
-//            }
-//        }];
-//    }
     
     if (nil == backgroundObjectContext) {
         return;
@@ -235,7 +196,7 @@ static CoreDataContext *sharedContext = nil;
 {
     if(!_backgroundContextQueue)
     {
-        _backgroundContextQueue = dispatch_queue_create("BackgroundCoreDataContextQueue", DISPATCH_QUEUE_PRIORITY_DEFAULT);
+        _backgroundContextQueue = dispatch_queue_create("BackgroundCoreDataContextQueue", DISPATCH_QUEUE_SERIAL);
     }
     return _backgroundContextQueue;
 }
